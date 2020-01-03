@@ -1,4 +1,4 @@
-/*Создание структуры БД*/
+/*РЎРѕР·РґР°РЅРёРµ СЃС‚СЂСѓРєС‚СѓСЂС‹ Р‘Р”*/
 
 drop schema if exists pod;
 create database pod;
@@ -118,7 +118,7 @@ constraint fk_Build_unom_STO foreign key (Build_unom) references address_registe
 ON UPDATE CASCADE
 );
 
-/*Загрузка данных*/
+/*Р—Р°РіСЂСѓР·РєР° РґР°РЅРЅС‹С…*/
 
 use pod;
 
@@ -170,19 +170,19 @@ load data infile 'C:/ProgramData/MySQL/MySQL Server 8.0/Uploads/STO_register.csv
 into
 	table pod.STO_register FIELDS terminated by ';' ignore 1 lines ;
 
-/*Создание представлений*/
+/*РЎРѕР·РґР°РЅРёРµ РїСЂРµРґСЃС‚Р°РІР»РµРЅРёР№*/
 
-/*Предствление №1 "Объем генерации отходов на объектах общественного питания"*/
+/*РџСЂРµРґСЃС‚РІР»РµРЅРёРµ в„–1 "РћР±СЉРµРј РіРµРЅРµСЂР°С†РёРё РѕС‚С…РѕРґРѕРІ РЅР° РѕР±СЉРµРєС‚Р°С… РѕР±С‰РµСЃС‚РІРµРЅРЅРѕРіРѕ РїРёС‚Р°РЅРёСЏ"*/
 
 drop view if exists pod.v1;
 create or replace
 algorithm = UNDEFINED view pod.v1 as
 select
-    t_cfr.name as `Название объекта`,
-    t_cfr.SeatsCount as `Количество посадочный мест`,
-    t_to.Type_Object as `Тип объекта`,
-    t_norm.cat_normative as `Норматив`,
-    ROUND((t_cfr.SeatsCount * t_norm.cat_normative / 1000),2) as `Объем образования отходов, тонн`
+    t_cfr.name as `РќР°Р·РІР°РЅРёРµ РѕР±СЉРµРєС‚Р°`,
+    t_cfr.SeatsCount as `РљРѕР»РёС‡РµСЃС‚РІРѕ РїРѕСЃР°РґРѕС‡РЅС‹Р№ РјРµСЃС‚`,
+    t_to.Type_Object as `РўРёРї РѕР±СЉРµРєС‚Р°`,
+    t_norm.cat_normative as `РќРѕСЂРјР°С‚РёРІ`,
+    ROUND((t_cfr.SeatsCount * t_norm.cat_normative / 1000),2) as `РћР±СЉРµРј РѕР±СЂР°Р·РѕРІР°РЅРёСЏ РѕС‚С…РѕРґРѕРІ, С‚РѕРЅРЅ`
 from
     (pod.catering_facilities_register as t_cfr
 left join pod.type_objects as t_to on
@@ -191,17 +191,17 @@ left join pod.type_objects as t_to on
     (t_to.cat_normative = t_norm.id))   
     ;
 
-/*Предствление №2 "Объем генерации отходов на объектах стационарной торговли"*/
+/*РџСЂРµРґСЃС‚РІР»РµРЅРёРµ в„–2 "РћР±СЉРµРј РіРµРЅРµСЂР°С†РёРё РѕС‚С…РѕРґРѕРІ РЅР° РѕР±СЉРµРєС‚Р°С… СЃС‚Р°С†РёРѕРЅР°СЂРЅРѕР№ С‚РѕСЂРіРѕРІР»Рё"*/
 
 drop view if exists pod.v2;
 create or replace
 algorithm = UNDEFINED view pod.v2 as
 select
-    t_sto.name as `Название объекта`,
-    t_sto.area as `Площадь`,
-    t_to.Type_Object as `Тип объекта`,
-    t_norm.cat_normative as `Норматив`,
-    ROUND((t_sto.area * t_norm.cat_normative / 1000),2) as `Объем образования отходов, тонн`
+    t_sto.name as `РќР°Р·РІР°РЅРёРµ РѕР±СЉРµРєС‚Р°`,
+    t_sto.area as `РџР»РѕС‰Р°РґСЊ`,
+    t_to.Type_Object as `РўРёРї РѕР±СЉРµРєС‚Р°`,
+    t_norm.cat_normative as `РќРѕСЂРјР°С‚РёРІ`,
+    ROUND((t_sto.area * t_norm.cat_normative / 1000),2) as `РћР±СЉРµРј РѕР±СЂР°Р·РѕРІР°РЅРёСЏ РѕС‚С…РѕРґРѕРІ, С‚РѕРЅРЅ`
 from
     (pod.sto_register as t_sto
 left join pod.type_objects as t_to on
@@ -210,17 +210,17 @@ left join pod.type_objects as t_to on
     (t_to.cat_normative = t_norm.id))   
     ;
     
-/*Предствление №3 "Объем генерации отходов в разрезе зданий"*/
+/*РџСЂРµРґСЃС‚РІР»РµРЅРёРµ в„–3 "РћР±СЉРµРј РіРµРЅРµСЂР°С†РёРё РѕС‚С…РѕРґРѕРІ РІ СЂР°Р·СЂРµР·Рµ Р·РґР°РЅРёР№"*/
 
 drop view if exists pod.v3;
 create or replace
 algorithm = UNDEFINED view pod.v3 as
-select t1.UNOM, t1.`Адрес здания`, count(t1.`Объем образования отходов, тонн`) as 'Количество отходообразователей', sum(t1.`Объем образования отходов, тонн`) as 'Объем образования отходов, тонн' from
+select t1.UNOM, t1.`РђРґСЂРµСЃ Р·РґР°РЅРёСЏ`, count(t1.`РћР±СЉРµРј РѕР±СЂР°Р·РѕРІР°РЅРёСЏ РѕС‚С…РѕРґРѕРІ, С‚РѕРЅРЅ`) as 'РљРѕР»РёС‡РµСЃС‚РІРѕ РѕС‚С…РѕРґРѕРѕР±СЂР°Р·РѕРІР°С‚РµР»РµР№', sum(t1.`РћР±СЉРµРј РѕР±СЂР°Р·РѕРІР°РЅРёСЏ РѕС‚С…РѕРґРѕРІ, С‚РѕРЅРЅ`) as 'РћР±СЉРµРј РѕР±СЂР°Р·РѕРІР°РЅРёСЏ РѕС‚С…РѕРґРѕРІ, С‚РѕРЅРЅ' from
 (select
-t_ar.address as `Адрес здания`,
+t_ar.address as `РђРґСЂРµСЃ Р·РґР°РЅРёСЏ`,
 	t_ar.`UNOM` as `UNOM`,
-    t_sto.name as `Наименование`,
-    ROUND((t_sto.area * t_norm.cat_normative / 1000),2) as `Объем образования отходов, тонн`
+    t_sto.name as `РќР°РёРјРµРЅРѕРІР°РЅРёРµ`,
+    ROUND((t_sto.area * t_norm.cat_normative / 1000),2) as `РћР±СЉРµРј РѕР±СЂР°Р·РѕРІР°РЅРёСЏ РѕС‚С…РѕРґРѕРІ, С‚РѕРЅРЅ`
 from
     (pod.address_register as t_ar
 left join pod.sto_register as t_sto on
@@ -231,10 +231,10 @@ left join pod.normative as t_norm on
     (t_to.cat_normative = t_norm.id))   
 union all
 select
-t_ar.address as `Адрес здания`,
+t_ar.address as `РђРґСЂРµСЃ Р·РґР°РЅРёСЏ`,
 	t_ar.`UNOM` as `UNOM`,
-    t_cfr.name as `Наименование`,
-    ROUND((t_cfr.SeatsCount * t_norm.cat_normative / 1000),2) as `Объем образования отходов, тонн`
+    t_cfr.name as `РќР°РёРјРµРЅРѕРІР°РЅРёРµ`,
+    ROUND((t_cfr.SeatsCount * t_norm.cat_normative / 1000),2) as `РћР±СЉРµРј РѕР±СЂР°Р·РѕРІР°РЅРёСЏ РѕС‚С…РѕРґРѕРІ, С‚РѕРЅРЅ`
 from
     (pod.address_register as t_ar
 left join pod.catering_facilities_register as t_cfr on
@@ -247,7 +247,7 @@ left join pod.type_objects as t_to on
 group by t1.UNOM
 order by t1.UNOM;    
    
-/*Предствление №4 "Объем генерации ТКО в разрезе МНО"*/
+/*РџСЂРµРґСЃС‚РІР»РµРЅРёРµ в„–4 "РћР±СЉРµРј РіРµРЅРµСЂР°С†РёРё РўРљРћ РІ СЂР°Р·СЂРµР·Рµ РњРќРћ"*/
 
 drop view if exists pod.v4;
 
@@ -257,27 +257,27 @@ select
 	mno.`Id`,
 	mno.mno_adress,
 	mno.mno_type,
-	(sum(v3.`Объем образования отходов, тонн`) / count(mno.`serv_bild_UNOM`) over(partition by mno.`serv_bild_UNOM`)) as `Объем образования отходов, тонн`
+	(sum(v3.`РћР±СЉРµРј РѕР±СЂР°Р·РѕРІР°РЅРёСЏ РѕС‚С…РѕРґРѕРІ, С‚РѕРЅРЅ`) / count(mno.`serv_bild_UNOM`) over(partition by mno.`serv_bild_UNOM`)) as `РћР±СЉРµРј РѕР±СЂР°Р·РѕРІР°РЅРёСЏ РѕС‚С…РѕРґРѕРІ, С‚РѕРЅРЅ`
 from
 	pod.mno as mno left join pod.v3 as v3 on (mno.serv_bild_UNOM = v3.`UNOM`)
 where mno_type = 1
 group by mno.`Id`;
 
-/*Тригеры*/
+/*РўСЂРёРіРµСЂС‹*/
 
-/*Таблица для лога*/
+/*РўР°Р±Р»РёС†Р° РґР»СЏ Р»РѕРіР°*/
 drop table if exists logs;
 CREATE TABLE `logs` (
-  `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'Время и дата создания записи',
-  `tab_name` varchar(255) default NULL COMMENT 'Название таблицы',
-  `id` int(11) DEFAULT NULL COMMENT 'Идентификатор первичного ключа',
-  `old_record` TEXT default NULL COMMENT 'Старая запись',
-  `new_record` text DEFAULT NULL COMMENT 'Новая запись',
-  `action_type` varchar(255) DEFAULT NULL COMMENT 'Действие'
+  `created_at` datetime DEFAULT CURRENT_TIMESTAMP COMMENT 'Р’СЂРµРјСЏ Рё РґР°С‚Р° СЃРѕР·РґР°РЅРёСЏ Р·Р°РїРёСЃРё',
+  `tab_name` varchar(255) default NULL COMMENT 'РќР°Р·РІР°РЅРёРµ С‚Р°Р±Р»РёС†С‹',
+  `id` int(11) DEFAULT NULL COMMENT 'РРґРµРЅС‚РёС„РёРєР°С‚РѕСЂ РїРµСЂРІРёС‡РЅРѕРіРѕ РєР»СЋС‡Р°',
+  `old_record` TEXT default NULL COMMENT 'РЎС‚Р°СЂР°СЏ Р·Р°РїРёСЃСЊ',
+  `new_record` text DEFAULT NULL COMMENT 'РќРѕРІР°СЏ Р·Р°РїРёСЃСЊ',
+  `action_type` varchar(255) DEFAULT NULL COMMENT 'Р”РµР№СЃС‚РІРёРµ'
 ) ENGINE=ARCHIVE DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci
 ;
 
-/*Сами тригеры*/
+/*РЎР°РјРё С‚СЂРёРіРµСЂС‹*/
 DELIMITER //
 drop trigger if exists check_ar_update //
 CREATE TRIGGER check_ar_update AFTER update ON pod.address_register FOR EACH ROW BEGIN
@@ -292,9 +292,9 @@ CREATE TRIGGER check_ar_update AFTER update ON pod.address_register FOR EACH ROW
     now(),
 	'pod.address_register',
 	new.UNOM,
-	concat(ifnull(old.UNOM,'пусто'),'\n',ifnull(old.address,'пусто'),'\n',ifnull(old.bild_obj_type,'пусто'),'\n',ifnull(old.ADM_AREA,'пусто'),'\n',ifnull(old.DISTRICT,'пусто'),'\n',ifnull(old.N_FIAS,'пусто'),'\n',ifnull(old.KAD_N,'пусто'),'\n',ifnull(old.KAD_ZU,'пусто'),'\n',ifnull(old.geoData,'пусто')),
-	concat(ifnull(new.UNOM,'пусто'),'\n',ifnull(new.address,'пусто'),'\n',ifnull(new.bild_obj_type,'пусто'),'\n',ifnull(new.ADM_AREA,'пусто'),'\n',ifnull(new.DISTRICT,'пусто'),'\n',ifnull(new.N_FIAS,'пусто'),'\n',ifnull(new.KAD_N,'пусто'),'\n',ifnull(new.KAD_ZU,'пусто'),'\n',ifnull(new.geoData,'пусто')),
-	'Изменение'
+	concat(ifnull(old.UNOM,'РїСѓСЃС‚Рѕ'),'\n',ifnull(old.address,'РїСѓСЃС‚Рѕ'),'\n',ifnull(old.bild_obj_type,'РїСѓСЃС‚Рѕ'),'\n',ifnull(old.ADM_AREA,'РїСѓСЃС‚Рѕ'),'\n',ifnull(old.DISTRICT,'РїСѓСЃС‚Рѕ'),'\n',ifnull(old.N_FIAS,'РїСѓСЃС‚Рѕ'),'\n',ifnull(old.KAD_N,'РїСѓСЃС‚Рѕ'),'\n',ifnull(old.KAD_ZU,'РїСѓСЃС‚Рѕ'),'\n',ifnull(old.geoData,'РїСѓСЃС‚Рѕ')),
+	concat(ifnull(new.UNOM,'РїСѓСЃС‚Рѕ'),'\n',ifnull(new.address,'РїСѓСЃС‚Рѕ'),'\n',ifnull(new.bild_obj_type,'РїСѓСЃС‚Рѕ'),'\n',ifnull(new.ADM_AREA,'РїСѓСЃС‚Рѕ'),'\n',ifnull(new.DISTRICT,'РїСѓСЃС‚Рѕ'),'\n',ifnull(new.N_FIAS,'РїСѓСЃС‚Рѕ'),'\n',ifnull(new.KAD_N,'РїСѓСЃС‚Рѕ'),'\n',ifnull(new.KAD_ZU,'РїСѓСЃС‚Рѕ'),'\n',ifnull(new.geoData,'РїСѓСЃС‚Рѕ')),
+	'РР·РјРµРЅРµРЅРёРµ'
      );
 end //
 
@@ -310,8 +310,8 @@ CREATE TRIGGER check_ar_insert AFTER insert ON pod.address_register FOR EACH ROW
     now(),
 	'pod.address_register',
 	new.UNOM,
-	concat(ifnull(new.UNOM,'пусто'),'\n',ifnull(new.address,'пусто'),'\n',ifnull(new.bild_obj_type,'пусто'),'\n',ifnull(new.ADM_AREA,'пусто'),'\n',ifnull(new.DISTRICT,'пусто'),'\n',ifnull(new.N_FIAS,'пусто'),'\n',ifnull(new.KAD_N,'пусто'),'\n',ifnull(new.KAD_ZU,'пусто'),'\n',ifnull(new.geoData,'пусто')),
-	'Добавление'
+	concat(ifnull(new.UNOM,'РїСѓСЃС‚Рѕ'),'\n',ifnull(new.address,'РїСѓСЃС‚Рѕ'),'\n',ifnull(new.bild_obj_type,'РїСѓСЃС‚Рѕ'),'\n',ifnull(new.ADM_AREA,'РїСѓСЃС‚Рѕ'),'\n',ifnull(new.DISTRICT,'РїСѓСЃС‚Рѕ'),'\n',ifnull(new.N_FIAS,'РїСѓСЃС‚Рѕ'),'\n',ifnull(new.KAD_N,'РїСѓСЃС‚Рѕ'),'\n',ifnull(new.KAD_ZU,'РїСѓСЃС‚Рѕ'),'\n',ifnull(new.geoData,'РїСѓСЃС‚Рѕ')),
+	'Р”РѕР±Р°РІР»РµРЅРёРµ'
      );
 end //
 
@@ -327,8 +327,8 @@ CREATE TRIGGER check_ar_DELETE AFTER DELETE ON pod.address_register FOR EACH ROW
     now(),
 	'pod.address_register',
 	old.UNOM,
-	concat(ifnull(old.UNOM,'пусто'),'\n',ifnull(old.address,'пусто'),'\n',ifnull(old.bild_obj_type,'пусто'),'\n',ifnull(old.ADM_AREA,'пусто'),'\n',ifnull(old.DISTRICT,'пусто'),'\n',ifnull(old.N_FIAS,'пусто'),'\n',ifnull(old.KAD_N,'пусто'),'\n',ifnull(old.KAD_ZU,'пусто'),'\n',ifnull(old.geoData,'пусто')),
-	'Удаление'
+	concat(ifnull(old.UNOM,'РїСѓСЃС‚Рѕ'),'\n',ifnull(old.address,'РїСѓСЃС‚Рѕ'),'\n',ifnull(old.bild_obj_type,'РїСѓСЃС‚Рѕ'),'\n',ifnull(old.ADM_AREA,'РїСѓСЃС‚Рѕ'),'\n',ifnull(old.DISTRICT,'РїСѓСЃС‚Рѕ'),'\n',ifnull(old.N_FIAS,'РїСѓСЃС‚Рѕ'),'\n',ifnull(old.KAD_N,'РїСѓСЃС‚Рѕ'),'\n',ifnull(old.KAD_ZU,'РїСѓСЃС‚Рѕ'),'\n',ifnull(old.geoData,'РїСѓСЃС‚Рѕ')),
+	'РЈРґР°Р»РµРЅРёРµ'
      );
 end //
 
@@ -345,9 +345,9 @@ CREATE TRIGGER check_sto_update AFTER update ON pod.sto_register FOR EACH ROW BE
     now(),
 	'pod.sto_register',
 	new.Id,
-	concat(ifnull(old.Id,'пусто'),'\n',ifnull(old.name,'пусто'),'\n',ifnull(old.IsNetObject,'пусто'),'\n',ifnull(old.TypeObject_id,'пусто'),'\n',ifnull(old.PublicPhone,'пусто'),'\n',ifnull(old.WorkingHours,'пусто'),'\n',ifnull(old.area,'пусто'),'\n',ifnull(old.Build_unom,'пусто')),
-	concat(ifnull(new.Id,'пусто'),'\n',ifnull(new.name,'пусто'),'\n',ifnull(new.IsNetObject,'пусто'),'\n',ifnull(new.TypeObject_id,'пусто'),'\n',ifnull(new.PublicPhone,'пусто'),'\n',ifnull(new.WorkingHours,'пусто'),'\n',ifnull(new.area,'пусто'),'\n',ifnull(new.Build_unom,'пусто')),
-	'Изменение' 
+	concat(ifnull(old.Id,'РїСѓСЃС‚Рѕ'),'\n',ifnull(old.name,'РїСѓСЃС‚Рѕ'),'\n',ifnull(old.IsNetObject,'РїСѓСЃС‚Рѕ'),'\n',ifnull(old.TypeObject_id,'РїСѓСЃС‚Рѕ'),'\n',ifnull(old.PublicPhone,'РїСѓСЃС‚Рѕ'),'\n',ifnull(old.WorkingHours,'РїСѓСЃС‚Рѕ'),'\n',ifnull(old.area,'РїСѓСЃС‚Рѕ'),'\n',ifnull(old.Build_unom,'РїСѓСЃС‚Рѕ')),
+	concat(ifnull(new.Id,'РїСѓСЃС‚Рѕ'),'\n',ifnull(new.name,'РїСѓСЃС‚Рѕ'),'\n',ifnull(new.IsNetObject,'РїСѓСЃС‚Рѕ'),'\n',ifnull(new.TypeObject_id,'РїСѓСЃС‚Рѕ'),'\n',ifnull(new.PublicPhone,'РїСѓСЃС‚Рѕ'),'\n',ifnull(new.WorkingHours,'РїСѓСЃС‚Рѕ'),'\n',ifnull(new.area,'РїСѓСЃС‚Рѕ'),'\n',ifnull(new.Build_unom,'РїСѓСЃС‚Рѕ')),
+	'РР·РјРµРЅРµРЅРёРµ' 
 	);
 end //
 
@@ -363,9 +363,9 @@ CREATE TRIGGER check_sto_insert AFTER insert ON pod.sto_register FOR EACH ROW BE
     now(),
 	'pod.sto_register',
 	new.Id,
-	concat(ifnull(new.Id,'пусто'),'\n',ifnull(new.name,'пусто'),'\n',ifnull(new.IsNetObject,'пусто'),'\n',ifnull(new.TypeObject_id,'пусто'),'\n',
-	ifnull(new.PublicPhone,'пусто'),'\n',ifnull(new.WorkingHours,'пусто'),'\n',ifnull(new.area,'пусто'),'\n',ifnull(new.Build_unom,'пусто')),
-	'Добавление'
+	concat(ifnull(new.Id,'РїСѓСЃС‚Рѕ'),'\n',ifnull(new.name,'РїСѓСЃС‚Рѕ'),'\n',ifnull(new.IsNetObject,'РїСѓСЃС‚Рѕ'),'\n',ifnull(new.TypeObject_id,'РїСѓСЃС‚Рѕ'),'\n',
+	ifnull(new.PublicPhone,'РїСѓСЃС‚Рѕ'),'\n',ifnull(new.WorkingHours,'РїСѓСЃС‚Рѕ'),'\n',ifnull(new.area,'РїСѓСЃС‚Рѕ'),'\n',ifnull(new.Build_unom,'РїСѓСЃС‚Рѕ')),
+	'Р”РѕР±Р°РІР»РµРЅРёРµ'
      );
 end //
 
@@ -381,9 +381,9 @@ CREATE TRIGGER check_sto_DELETE AFTER DELETE ON pod.sto_register FOR EACH ROW BE
     now(),
 	'pod.sto_register',
 	old.Id,
-	concat(ifnull(old.Id,'пусто'),'\n',ifnull(old.name,'пусто'),'\n',ifnull(old.IsNetObject,'пусто'),'\n',ifnull(old.TypeObject_id,'пусто'),'\n',
-	ifnull(old.PublicPhone,'пусто'),'\n',ifnull(old.WorkingHours,'пусто'),'\n',ifnull(old.area,'пусто'),'\n',ifnull(old.Build_unom,'пусто')),
-	'Удаление'
+	concat(ifnull(old.Id,'РїСѓСЃС‚Рѕ'),'\n',ifnull(old.name,'РїСѓСЃС‚Рѕ'),'\n',ifnull(old.IsNetObject,'РїСѓСЃС‚Рѕ'),'\n',ifnull(old.TypeObject_id,'РїСѓСЃС‚Рѕ'),'\n',
+	ifnull(old.PublicPhone,'РїСѓСЃС‚Рѕ'),'\n',ifnull(old.WorkingHours,'РїСѓСЃС‚Рѕ'),'\n',ifnull(old.area,'РїСѓСЃС‚Рѕ'),'\n',ifnull(old.Build_unom,'РїСѓСЃС‚Рѕ')),
+	'РЈРґР°Р»РµРЅРёРµ'
      );
 end //
 
@@ -400,11 +400,11 @@ CREATE TRIGGER check_catering_facilities_register_update AFTER update ON pod.cat
     now(),
 	'pod.catering_facilities_register',
 	new.Id,
-	concat(ifnull(old.Id,'пусто'),'\n',ifnull(old.Build_unom,'пусто'),'\n',ifnull(old.Type_Object,'пусто'),'\n',ifnull(old.name,'пусто'),
-	'\n',ifnull(old.PublicPhone,'пусто'),'\n',ifnull(old.SeatsCount,'пусто'),'\n',ifnull(old.IsNetObject,'пусто')),
-	concat(ifnull(new.Id,'пусто'),'\n',ifnull(new.Build_unom,'пусто'),'\n',ifnull(new.Type_Object,'пусто'),'\n',ifnull(new.name,'пусто'),
-	'\n',ifnull(new.PublicPhone,'пусто'),'\n',ifnull(new.SeatsCount,'пусто'),'\n',ifnull(new.IsNetObject,'пусто')),
-	'Изменение' 
+	concat(ifnull(old.Id,'РїСѓСЃС‚Рѕ'),'\n',ifnull(old.Build_unom,'РїСѓСЃС‚Рѕ'),'\n',ifnull(old.Type_Object,'РїСѓСЃС‚Рѕ'),'\n',ifnull(old.name,'РїСѓСЃС‚Рѕ'),
+	'\n',ifnull(old.PublicPhone,'РїСѓСЃС‚Рѕ'),'\n',ifnull(old.SeatsCount,'РїСѓСЃС‚Рѕ'),'\n',ifnull(old.IsNetObject,'РїСѓСЃС‚Рѕ')),
+	concat(ifnull(new.Id,'РїСѓСЃС‚Рѕ'),'\n',ifnull(new.Build_unom,'РїСѓСЃС‚Рѕ'),'\n',ifnull(new.Type_Object,'РїСѓСЃС‚Рѕ'),'\n',ifnull(new.name,'РїСѓСЃС‚Рѕ'),
+	'\n',ifnull(new.PublicPhone,'РїСѓСЃС‚Рѕ'),'\n',ifnull(new.SeatsCount,'РїСѓСЃС‚Рѕ'),'\n',ifnull(new.IsNetObject,'РїСѓСЃС‚Рѕ')),
+	'РР·РјРµРЅРµРЅРёРµ' 
 	);
 end //
 
@@ -420,9 +420,9 @@ CREATE TRIGGER check_catering_facilities_register_insert AFTER insert ON pod.cat
     now(),
 	'pod.catering_facilities_register',
 	new.Id,
-	concat(ifnull(new.Id,'пусто'),'\n',ifnull(new.Build_unom,'пусто'),'\n',ifnull(new.Type_Object,'пусто'),'\n',ifnull(new.name,'пусто'),
-	'\n',ifnull(new.PublicPhone,'пусто'),'\n',ifnull(new.SeatsCount,'пусто'),'\n',ifnull(new.IsNetObject,'пусто')),
-	'Добавление'
+	concat(ifnull(new.Id,'РїСѓСЃС‚Рѕ'),'\n',ifnull(new.Build_unom,'РїСѓСЃС‚Рѕ'),'\n',ifnull(new.Type_Object,'РїСѓСЃС‚Рѕ'),'\n',ifnull(new.name,'РїСѓСЃС‚Рѕ'),
+	'\n',ifnull(new.PublicPhone,'РїСѓСЃС‚Рѕ'),'\n',ifnull(new.SeatsCount,'РїСѓСЃС‚Рѕ'),'\n',ifnull(new.IsNetObject,'РїСѓСЃС‚Рѕ')),
+	'Р”РѕР±Р°РІР»РµРЅРёРµ'
      );
 end //
 
@@ -438,9 +438,9 @@ CREATE TRIGGER check_catering_facilities_register_DELETE AFTER DELETE ON pod.cat
     now(),
 	'pod.catering_facilities_register',
 	old.Id,
-	concat(ifnull(old.Id,'пусто'),'\n',ifnull(old.Build_unom,'пусто'),'\n',ifnull(old.Type_Object,'пусто'),'\n',ifnull(old.name,'пусто'),
-	'\n',ifnull(old.PublicPhone,'пусто'),'\n',ifnull(old.SeatsCount,'пусто'),'\n',ifnull(old.IsNetObject,'пусто')),
-	'Удаление'
+	concat(ifnull(old.Id,'РїСѓСЃС‚Рѕ'),'\n',ifnull(old.Build_unom,'РїСѓСЃС‚Рѕ'),'\n',ifnull(old.Type_Object,'РїСѓСЃС‚Рѕ'),'\n',ifnull(old.name,'РїСѓСЃС‚Рѕ'),
+	'\n',ifnull(old.PublicPhone,'РїСѓСЃС‚Рѕ'),'\n',ifnull(old.SeatsCount,'РїСѓСЃС‚Рѕ'),'\n',ifnull(old.IsNetObject,'РїСѓСЃС‚Рѕ')),
+	'РЈРґР°Р»РµРЅРёРµ'
      );
 end //
 
